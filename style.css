@@ -1,0 +1,218 @@
+:root{
+      --bg:#0f1724;
+      --panel:#0b1220;
+      --accent:#7c5cff;
+      --muted:#9aa4b2;
+      --cell:#081223;
+      --given:#e6eef8;
+      --user:#a7d1ff;
+      --conflict:#ffb4b4;
+      --good:#9ff7b5;
+      --gap:6px;
+      --cell-size:54px;
+      --board-size: calc(9 * var(--cell-size) + 8 * var(--gap));
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#071026 0%, #071733 100%);
+      color:var(--given);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px;
+      gap:24px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .container{
+      max-width:1100px;
+      width:100%;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:28px;
+      align-items:start;
+    }
+
+    header{
+      grid-column:1 / -1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:6px;
+    }
+    h1{margin:0;font-size:1.25rem;color:var(--accent);letter-spacing:0.2px}
+    .subtitle{color:var(--muted);font-size:0.95rem}
+
+    /* Left: board + controls */
+    .game-panel{
+      background:linear-gradient(180deg,var(--panel), rgba(11,18,32,0.9));
+      border-radius:14px;
+      padding:18px;
+      box-shadow: 0 6px 30px rgba(3,6,12,0.6);
+    }
+
+    .board-wrap{
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:center;
+      padding:8px;
+    }
+
+    /* Sudoku board using CSS Grid */
+    .sudoku-board{
+      width:var(--board-size);
+      height:var(--board-size);
+      display:grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      gap:var(--gap);
+      background:linear-gradient(180deg,#091425,#0c1728);
+      padding:10px;
+      border-radius:12px;
+    }
+
+    .cell{
+      width:100%;
+      height:100%;
+      min-width: var(--cell-size);
+      min-height: var(--cell-size);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--cell);
+      border-radius:8px;
+      font-size:1.05rem;
+      color:var(--user);
+      cursor:pointer;
+      user-select:none;
+      transition:transform .08s ease, box-shadow .08s ease, background .12s;
+      position:relative;
+    }
+
+    .cell:focus{outline: none}
+    .cell:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,0.45)}
+    .cell.given{
+      background:linear-gradient(180deg,#061126,#07122b);
+      color:var(--given);
+      font-weight:600;
+      cursor:default;
+    }
+    .cell.selected{
+      box-shadow:0 0 0 3px rgba(124,92,255,0.12), inset 0 0 0 2px rgba(124,92,255,0.12);
+      transform:none;
+    }
+    .cell.conflict{ background:linear-gradient(180deg,#3b1a1a,#2b1111); color:var(--conflict); }
+    .cell.note{
+      font-size:0.56rem;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:2px;
+      align-content:center;
+      width:100%;
+      height:100%;
+      padding:6px;
+      color:var(--muted);
+    }
+
+    /* Thicker borders for 3x3 regions */
+    .sudoku-board .cell{
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    /* Outline the 3x3 boxes */
+    .cell[data-row="0"], .cell[data-row="3"], .cell[data-row="6"] { /* top band handled via board padding */ }
+    /* We'll use pseudo elements to draw outer box borders */
+    .sudoku-board{
+      position:relative;
+    }
+    .sudoku-board::before,
+    .sudoku-board::after{
+      content:"";
+      position:absolute;
+      left:10px; right:10px; top:10px; bottom:10px;
+      border-radius:10px;
+      pointer-events:none;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.02) inset;
+    }
+
+    /* Controls on the right */
+    .sidebar{
+      background:linear-gradient(180deg,#071026,#061225);
+      border-radius:12px;
+      padding:18px;
+      min-height:420px;
+      box-shadow:0 6px 30px rgba(0,0,0,0.5);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .controls{display:flex;flex-direction:column;gap:12px}
+    .row{display:flex;gap:8px;align-items:center}
+    .btn{
+      background:transparent;
+      color:var(--given);
+      border:1px solid rgba(255,255,255,0.06);
+      padding:10px 12px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      letter-spacing:0.2px;
+    }
+    .btn.primary{
+      background:linear-gradient(90deg,var(--accent), #6b8bff);
+      border:none;
+      color:white;
+      box-shadow:0 8px 18px rgba(124,92,255,0.14);
+    }
+    label{color:var(--muted); font-size:0.9rem}
+
+    .stats{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px;
+      border-radius:8px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .stat{display:flex;flex-direction:column;align-items:flex-start}
+    .stat .value{font-weight:700;color:var(--given)}
+    .small{font-size:0.85rem;color:var(--muted)}
+
+    /* Number pad (mobile-friendly) */
+    .numpad{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:8px;
+      margin-top:8px;
+    }
+    .numpad button{
+      padding:14px;
+      border-radius:10px;
+      font-size:1.05rem;
+      font-weight:700;
+      border:1px solid rgba(255,255,255,0.04);
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      color:var(--given);
+      cursor:pointer;
+    }
+
+    footer.hint{
+      margin-top:auto;
+      font-size:0.85rem;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    /* Responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr; padding:10px}
+      .sidebar{order:2}
+    }

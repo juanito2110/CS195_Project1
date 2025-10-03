@@ -1,11 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sudoku — Project #1</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  
+  <div class="container">
+    <header>
+      <div>
+        <h1>Sudoku — Project #1</h1>
+        <div class="subtitle">Classic 9×9 Sudoku — fill each row, column, and 3×3 box with 1–9</div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <!-- These are buttons you'll hook with JS later -->
+        <button class="btn" id="btn-undo" title="Undo (not implemented)">Undo</button>
+        <button class="btn" id="btn-redo" title="Redo (not implemented)">Redo</button>
+        <button class="btn primary" id="btn-new">New Game</button>
+      </div>
+    </header>
+
+    <!-- Board + small controls -->
+    <section class="game-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;gap:12px;align-items:center">
+          <label for="difficulty" class="small">Difficulty</label>
+          <select id="difficulty" class="btn" style="padding:8px 10px;">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <label class="small" style="margin-left:10px">Notes mode</label>
+          <input type="checkbox" id="notes-mode" style="transform:scale(1.1);margin-left:6px;">
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" id="btn-check">Check</button>
+          <button class="btn" id="btn-solve">Solve</button>
+        </div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="sudoku-board" id="sudoku-board" aria-label="Sudoku grid" role="grid">
+          <!-- 9x9 cells. Use data-row and data-col attributes for JS hooks -->
+          <!-- Example: row and col are 0-based. Add class "given" for prefilled cells. -->
+          <!-- Replace the contents of these cells dynamically with JS later. -->
+
+          <!-- We'll generate the grid statically for the layout -->
+          <!-- Row 0 -->
+          <div class="cell given" data-row="0" data-col="0" role="gridcell" tabindex="-1">5</div>
+          <div class="cell" data-row="0" data-col="1" role="gridcell" tabindex="0"></div>
+          <div class="cell" data-row="0" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="0" data-col="3" role="gridcell" tabindex="-1">8</div>
+          <div class="cell" data-row="0" data-col="4" role="gridcell" tabindex="-1">1</div>
+          <div class="cell" data-row="0" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="0" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="0" data-col="7" role="gridcell" tabindex="-1">4</div>
+          <div class="cell" data-row="0" data-col="8" role="gridcell" tabindex="-1">7</div>
+
+          <!-- Row 1 -->
+          <div class="cell" data-row="1" data-col="0" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="1" data-col="1" role="gridcell" tabindex="-1">2</div>
+          <div class="cell" data-row="1" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="1" data-col="3" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="1" data-col="4" role="gridcell" tabindex="-1">9</div>
+          <div class="cell" data-row="1" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="1" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="1" data-col="7" role="gridcell" tabindex="-1">6</div>
+          <div class="cell" data-row="1" data-col="8" role="gridcell" tabindex="-1"></div>
+
+          <!-- Row 2 -->
+          <div class="cell" data-row="2" data-col="0" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="2" data-col="1" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="2" data-col="2" role="gridcell" tabindex="-1">3</div>
+          <div class="cell" data-row="2" data-col="3" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="2" data-col="4" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="2" data-col="5" role="gridcell" tabindex="-1">6</div>
+          <div class="cell" data-row="2" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="2" data-col="7" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="2" data-col="8" role="gridcell" tabindex="-1">1</div>
+
+          <!-- Row 3 -->
+          <div class="cell" data-row="3" data-col="0" role="gridcell" tabindex="-1">1</div>
+          <div class="cell" data-row="3" data-col="1" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="3" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="3" data-col="3" role="gridcell" tabindex="-1">4</div>
+          <div class="cell" data-row="3" data-col="4" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="3" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="3" data-col="6" role="gridcell" tabindex="-1">8</div>
+          <div class="cell" data-row="3" data-col="7" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="3" data-col="8" role="gridcell" tabindex="-1"></div>
+
+          <!-- Row 4 -->
+          <div class="cell" data-row="4" data-col="0" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="4" data-col="1" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="4" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="4" data-col="3" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="4" data-col="4" role="gridcell" tabindex="-1">5</div>
+          <div class="cell" data-row="4" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="4" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="4" data-col="7" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="4" data-col="8" role="gridcell" tabindex="-1"></div>
+
+          <!-- Row 5 -->
+          <div class="cell" data-row="5" data-col="0" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="5" data-col="1" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="5" data-col="2" role="gridcell" tabindex="-1">9</div>
+          <div class="cell" data-row="5" data-col="3" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="5" data-col="4" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="5" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="5" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="5" data-col="7" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="5" data-col="8" role="gridcell" tabindex="-1">2</div>
+
+          <!-- Row 6 -->
+          <div class="cell" data-row="6" data-col="0" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="6" data-col="1" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="6" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="6" data-col="3" role="gridcell" tabindex="-1">6</div>
+          <div class="cell" data-row="6" data-col="4" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="6" data-col="5" role="gridcell" tabindex="-1">8</div>
+          <div class="cell" data-row="6" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="6" data-col="7" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="6" data-col="8" role="gridcell" tabindex="-1"></div>
+
+          <!-- Row 7 -->
+          <div class="cell" data-row="7" data-col="0" role="gridcell" tabindex="-1"></div>
+          <div class="cell given" data-row="7" data-col="1" role="gridcell" tabindex="-1">4</div>
+          <div class="cell" data-row="7" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="7" data-col="3" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="7" data-col="4" role="gridcell" tabindex="-1">3</div>
+          <div class="cell" data-row="7" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="7" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="7" data-col="7" role="gridcell" tabindex="-1">9</div>
+          <div class="cell" data-row="7" data-col="8" role="gridcell" tabindex="-1"></div>
+
+          <!-- Row 8 -->
+          <div class="cell" data-row="8" data-col="0" role="gridcell" tabindex="-1">7</div>
+          <div class="cell" data-row="8" data-col="1" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="8" data-col="2" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="8" data-col="3" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="8" data-col="4" role="gridcell" tabindex="-1">2</div>
+          <div class="cell" data-row="8" data-col="5" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="8" data-col="6" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="8" data-col="7" role="gridcell" tabindex="-1"></div>
+          <div class="cell" data-row="8" data-col="8" role="gridcell" tabindex="-1">6</div>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:10px;color:var(--muted)">
+        Controls: Click a cell or use the number pad. Toggle Notes mode for pencil marks. Keyboard support will be added via JavaScript.
+      </p>
+    </section>
+
+    <!-- Right sidebar -->
+    <aside class="sidebar" aria-label="Controls">
+      <div class="controls">
+        <div class="stats">
+          <div class="stat">
+            <div class="small">Time</div>
+            <div class="value" id="timer">00:00</div>
+          </div>
+          <div class="stat">
+            <div class="small">Mistakes</div>
+            <div class="value" id="mistakes">0</div>
+          </div>
+          <div class="stat">
+            <div class="small">Remaining</div>
+            <div class="value" id="remaining">81</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <label for="hintCount" class="small">Hints</label>
+          <button class="btn" id="btn-hint">Get hint</button>
+          <div style="flex:1"></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label class="small">Help</label>
+          <div class="small" style="color:var(--muted)">
+            - Click a cell to select it.<br>
+            - Use keyboard 1–9 or the number pad.<br>
+            - Notes mode: toggle to add pencil marks.<br>
+          </div>
+        </div>
+
+        <div style="margin-top:8px">
+          <label class="small">Difficulty</label>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="btn" id="easy">Easy</button>
+            <button class="btn" id="medium">Medium</button>
+            <button class="btn" id="hard">Hard</button>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label class="small">Number pad</label>
+          <div class="numpad" aria-hidden="false">
+            <button data-num="1">1</button>
+            <button data-num="2">2</button>
+            <button data-num="3">3</button>
+            <button data-num="4">4</button>
+            <button data-num="5">5</button>
+            <button data-num="6">6</button>
+            <button data-num="7">7</button>
+            <button data-num="8">8</button>
+            <button data-num="9">9</button>
+            <button data-action="erase" style="grid-column:span 2">Erase</button>
+            <button data-action="clear">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="hint">
+        Built with HTML, CSS, and vanilla JS — logic to be added next.
+      </footer>
+    </aside>
+  </div>
 </body>
 </html>
