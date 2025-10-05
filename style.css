@@ -90,14 +90,21 @@
       border-radius:8px;
       font-size:1.05rem;
       color:var(--user);
+      font-weight: 700;
       cursor:pointer;
       user-select:none;
       transition:transform .08s ease, box-shadow .08s ease, background .12s;
       position:relative;
     }
 
-    .cell:focus{outline: none}
+
     .cell:hover{transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,0.45)}
+    .cell:focus{
+      outline: none;
+      box-shadow:0 0 0 3px rgba(124,92,255,0.12), inset 0 0 0 3px rgba(124,92,255,0.12);
+      transform:none;
+      caret-color: transparent;
+    }
     .cell.given{
       background:linear-gradient(180deg,#061126,#07122b);
       color:var(--given);
