@@ -115,7 +115,7 @@
       box-shadow:0 0 0 3px rgba(124,92,255,0.12), inset 0 0 0 2px rgba(124,92,255,0.12);
       transform:none;
     }
-    .cell.conflict{ background:linear-gradient(180deg,#3b1a1a,#2b1111);  }
+    .cell.conflict{ background:linear-gradient(180deg,#3b1a1a,#2b1111); /*color:var(--conflict);*/ }
     .cell.note{
       font-size:0.56rem;
       display:grid;
@@ -131,11 +131,13 @@
     /* lighter background for row/column/box */
     .highlight {
       background-color: rgba(255, 223, 186, 0.169);
+      transition: all 0.3s ease;
     }
 
     /* --- Highlight overrides for given cells --- */
     .cell.given.highlight {
       background: rgba(255, 223, 186, 0.169) !important;
+      transition: all 0.3s ease;
     }
 
     .same-number {
@@ -155,7 +157,7 @@
     }
 
     .cell.given.conflict-number {
-      color: #ffb4b4 !important;
+      color: #df6161 !important;
       font-weight: bold;
       background:linear-gradient(180deg,#3b1a1a,#2b1111); color:var(--conflict);
       border: none !important;
@@ -169,6 +171,11 @@
     .cell.given.conflict-cell {
       background-color: rgba(255, 0, 0, 0.3) !important;
       border: 2px solid red !important;
+    }
+
+    .user-solved {
+      color: var(--user);
+      font-weight: 700;
     }
 
     /* Thicker borders for 3x3 regions */
