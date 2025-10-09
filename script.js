@@ -5,6 +5,8 @@ let board = [];          // Current puzzle (0 = empty)
 let solution = [];       // Correct solution
 let mistakes = 0;
 let remaining = 81;
+let timerInterval = null;
+let elapsedSeconds = 0;
 
 // =======================
 // HELPER: CREATE EMPTY GRID
@@ -120,6 +122,73 @@ function markConflictAndMatches(row, col, val, origCell) {
   }
 }
 
+function highlightRelatedCells(row, col) {
+  // clear any old highlights
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('highlight');
+  });
+
+  document.querySelectorAll('.cell').forEach(c => {
+    const r = parseInt(c.dataset.row, 10);
+    const cc = parseInt(c.dataset.col, 10);
+
+    const inSameRow = r === row;
+    const inSameCol = cc === col;
+    const inSameBox =
+      Math.floor(r / 3) === Math.floor(row / 3) &&
+      Math.floor(cc / 3) === Math.floor(col / 3);
+
+    if (inSameRow || inSameCol || inSameBox) {
+      c.classList.add('highlight');
+    }
+  });
+}
+
+function validateCellInput(cell) {
+  const row = parseInt(cell.dataset.row, 10);
+  const col = parseInt(cell.dataset.col, 10);
+  const val = parseInt(cell.textContent, 10);
+  if (Number.isNaN(val)) return;
+
+  if (val === solution[row][col]) {
+    // ✅ Correct
+    board[row][col] = val;
+    clearHighlights();
+    remaining = board.flat().filter(v => v === 0).length;
+    document.getElementById("remaining").textContent = remaining;
+    if (remaining === 0) {
+      setTimeout(() => alert("🎉 Congratulations! You solved the puzzle!"), 50);
+    }
+  } else {
+    // ❌ Wrong — use SAME logic as keyboard
+    mistakes++;
+    document.getElementById("mistakes").textContent = mistakes;
+    markConflictAndMatches(row, col, val, cell);
+    if (mistakes >= 3) {
+      setTimeout(() => { alert("❌ Game Over! Too many mistakes."); newGame(); }, 50);
+    }
+  }
+}
+
+function startTimer() {
+  // Clear any previous timer
+  clearInterval(timerInterval);
+  elapsedSeconds = 0;
+  updateTimerDisplay();
+
+  // Start new interval
+  timerInterval = setInterval(() => {
+    elapsedSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+// Format and update DOM
+function updateTimerDisplay() {
+  const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
+  const seconds = String(elapsedSeconds % 60).padStart(2, "0");
+  document.getElementById("timer").textContent = `${minutes}:${seconds}`;
+}
 
 // // mark conflict for a wrong entry at (row,col) in the given cell element
 // function markConflict(row, col, val, origCell) {
@@ -216,6 +285,7 @@ function newGame() {
   solution = board.map(row => [...row]); // Save solution
   board = makePuzzle(solution, 50);      // Remove ~50 cells
   renderBoard();
+  startTimer();
 }
 
 // =======================
@@ -347,52 +417,62 @@ function onCellInput(e) {
 // EVENT LISTENERS
 // =======================
 document.getElementById("btn-new").addEventListener("click", newGame);
-// document.getElementById("sudoku-board").addEventListener("input", onCellInput);
-// document.getElementById("sudoku-board").addEventListener("keydown", (e) => {
-//   const cell = e.target;
-//   if (!cell.classList.contains("cell") || cell.classList.contains("given")) return;
-
-//   e.preventDefault(); // Stop browser from typing automatically
-
-//   const row = parseInt(cell.dataset.row);
-//   const col = parseInt(cell.dataset.col);
-
-//   // Only allow typing numbers 1–9
-//   if (e.key >= "1" && e.key <= "9") {
-//     cell.textContent = e.key; // ✅ Manually set the typed number
-//   }
-
-//   // ✅ Validate only when Enter is pressed
-//   if (e.key === "Enter") {
-//     const val = parseInt(cell.textContent);
-//     if (Number.isNaN(val)) return;
-
-//     if (val === solution[row][col]) {
-//       board[row][col] = val;
-//       cell.classList.remove("conflict");
-//       remaining = board.flat().filter(v => v === 0).length;
-//       document.getElementById("remaining").textContent = remaining;
-
-//       if (remaining === 0) {
-//         alert("🎉 Congratulations! You solved the puzzle!");
-//       }
-//     } else {
-//       cell.classList.add("conflict");
-//       mistakes++;
-//       document.getElementById("mistakes").textContent = mistakes;
-//       if (mistakes >= 3) {
-//         alert("❌ Game Over! Too many mistakes.");
-//         newGame();
-//       }
-//     }
-//   }
-
-//   // Allow deleting with Backspace
-//   if (e.key === "Backspace") {
-//     cell.textContent = "";
-//     cell.classList.remove("conflict");
-//   }
+// document.querySelectorAll('.cell').forEach(cell => {
+//   cell.addEventListener('click', e => {
+//     const row = parseInt(cell.dataset.row);
+//     const col = parseInt(cell.dataset.col);
+//     highlightRelatedCells(row, col);
+//   });
 // });
+
+let activeCell = null;
+
+document.getElementById("sudoku-board").addEventListener("focusin", (e) => {
+  const cell = e.target.closest(".cell:not(.given)");
+  activeCell = cell || null;
+});
+
+document.querySelector(".numpad").addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (!btn || !activeCell) return;
+
+  const row = parseInt(activeCell.dataset.row);
+  const col = parseInt(activeCell.dataset.col);
+  const currentVal = parseInt(activeCell.textContent);
+
+  // ERASE → clear cell content
+  if (btn.dataset.action === "erase") {
+    activeCell.textContent = "";
+    activeCell.classList.remove("conflict", "same-number", "conflict-number", "good");
+    activeCell.dispatchEvent(new Event("input"));
+    return;
+  }
+
+  // ✅ CHECK → verify guess
+  if (btn.dataset.action === "check") {
+    if (!activeCell) return;
+    validateCellInput(activeCell); // ✅ Reuse same logic as Enter key
+    return;
+  }
+
+  // NUMBER INPUT
+  const num = btn.dataset.num;
+  if (num) {
+    activeCell.textContent = num;
+    activeCell.dispatchEvent(new Event("input"));
+    activeCell.focus();
+  }
+});
+
+document.getElementById("sudoku-board").addEventListener("focusin", (e) => {
+  const cell = e.target.closest(".cell");
+  if (!cell) return;
+
+  const row = parseInt(cell.dataset.row, 10);
+  const col = parseInt(cell.dataset.col, 10);
+  highlightRelatedCells(row, col);
+});
+
 document.getElementById("sudoku-board").addEventListener("keydown", (e) => {
   const cell = e.target;
   if (!cell || !cell.classList || !cell.classList.contains("cell") || cell.classList.contains("given")) return;
@@ -413,29 +493,7 @@ document.getElementById("sudoku-board").addEventListener("keydown", (e) => {
   // Enter => validate the current cell value
   if (e.key === "Enter") {
     e.preventDefault();
-    const val = parseInt(cell.textContent, 10);
-    if (Number.isNaN(val)) return;
-
-    if (val === solution[row][col]) {
-      // correct
-      board[row][col] = val;
-      clearHighlights();
-      remaining = board.flat().filter(v => v === 0).length;
-      document.getElementById("remaining").textContent = remaining;
-      if (remaining === 0) {
-        setTimeout(() => alert("🎉 Congratulations! You solved the puzzle!"), 50);
-      }
-    } else {
-      // wrong -> mark conflict & highlights
-      mistakes++;
-      document.getElementById("mistakes").textContent = mistakes;
-      // markConflict(row, col, val, cell);
-      // highlightConflicts(row, col, val);
-      markConflictAndMatches(row, col, val, cell);
-      if (mistakes >= 3) {
-        setTimeout(() => { alert("❌ Game Over! Too many mistakes."); newGame(); }, 50);
-      }
-    }
+    validateCellInput(cell); // ✅ Same logic as numpad
     return;
   }
 
@@ -449,6 +507,69 @@ document.getElementById("sudoku-board").addEventListener("keydown", (e) => {
 
   // allow arrow keys or other navigation to pass through (do nothing)
 });
+
+document.getElementById("btn-check").addEventListener("click", () => {
+  let incorrectCells = 0;
+  let emptyCells = 0;
+
+  // Loop through the board to count incorrect & empty cells
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const currentVal = board[r][c];
+      if (currentVal === 0) {
+        emptyCells++;
+      } else if (currentVal !== solution[r][c]) {
+        incorrectCells++;
+      }
+    }
+  }
+
+  const timeText = document.getElementById("timer").textContent; // ⏳ Time taken
+
+  if (emptyCells === 0 && incorrectCells === 0) {
+    alert(`🎉 Puzzle Solved!
+    ⏳ Time: ${timeText}
+    🎯 Mistakes: ${mistakes}
+    🧩 All cells are correct!`);
+      } else {
+        alert(`❌ Not yet solved
+    ⏳ Time: ${timeText}
+    🔴 Mistakes: ${mistakes}
+    ⬜ Empty cells: ${emptyCells}`);;
+  }
+});
+
+document.getElementById("btn-solve").addEventListener("click", () => {
+  // Stop timer
+  clearInterval(timerInterval);
+
+  // Fill only empty (non-given) cells and apply special class
+  document.querySelectorAll(".cell").forEach(cell => {
+    const row = parseInt(cell.dataset.row, 10);
+    const col = parseInt(cell.dataset.col, 10);
+
+    if (!cell.classList.contains("given")) {
+      board[row][col] = solution[row][col]; // Update board logic
+      cell.textContent = solution[row][col]; // Render number
+      cell.classList.add("user-solved"); // Apply color styling
+    }
+
+    // Disable interactions
+    cell.contentEditable = "false";
+    cell.classList.remove("conflict", "highlight");
+  });
+
+  // After 5 seconds, show summary and restart
+  setTimeout(() => {
+    const timeText = document.getElementById("timer").textContent;
+    alert(`🧩 Full Solution Revealed
+    ⏳ Time: ${timeText}
+    🎯 Mistakes: ${mistakes}
+    🎮 Starting a new game...`);
+    newGame();
+  }, 5000);
+});
+
 
 // =======================
 // INIT
