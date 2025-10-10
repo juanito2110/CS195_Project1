@@ -7,6 +7,7 @@ let mistakes = 0;
 let remaining = 81;
 let timerInterval = null;
 let elapsedSeconds = 0;
+let currentDifficulty = "medium"; 
 
 // =======================
 // HELPER: CREATE EMPTY GRID
@@ -190,69 +191,6 @@ function updateTimerDisplay() {
   document.getElementById("timer").textContent = `${minutes}:${seconds}`;
 }
 
-// // mark conflict for a wrong entry at (row,col) in the given cell element
-// function markConflict(row, col, val, origCell) {
-//   // clear first
-//   clearHighlights();
-
-//   // add highlight to row/col/box and border to same numbers
-//   document.querySelectorAll(".cell").forEach(c => {
-//     const r = parseInt(c.dataset.row, 10);
-//     const cc = parseInt(c.dataset.col, 10);
-
-//     const inSameRow = r === row;
-//     const inSameCol = cc === col;
-//     const inSameBox =
-//       Math.floor(r / 3) === Math.floor(row / 3) &&
-//       Math.floor(cc / 3) === Math.floor(col / 3);
-
-//     if (inSameRow || inSameCol || inSameBox) {
-//       c.classList.add("highlight");
-//     }
-
-//     const cVal = parseInt(c.textContent, 10);
-//     if (!Number.isNaN(cVal) && cVal === val && c !== origCell) {
-//       c.classList.add("same-number");
-//     }
-//   });
-
-//   // style the original (wrong) cell's number
-//   origCell.classList.add("conflict", "conflict-number");
-// }
-
-// function highlightConflicts(row, col, value) {
-//   // First, remove all previous conflict highlighting
-//   document.querySelectorAll('.conflict-cell').forEach(cell => {
-//     cell.classList.remove('conflict-cell');
-//   });
-
-//   if (value === 0) return; // If the cell is empty, skip
-
-//   // Check row and column conflicts
-//   for (let i = 0; i < 9; i++) {
-//     // Row check
-//     if (i !== col && game.board[row][i] === value) {
-//       document.getElementById(`cell-${row}-${i}`).classList.add('conflict-cell');
-//     }
-//     // Column check
-//     if (i !== row && game.board[i][col] === value) {
-//       document.getElementById(`cell-${i}-${col}`).classList.add('conflict-cell');
-//     }
-//   }
-
-//   // Check 3x3 box conflicts
-//   const boxRow = Math.floor(row / 3) * 3;
-//   const boxCol = Math.floor(col / 3) * 3;
-
-//   for (let r = boxRow; r < boxRow + 3; r++) {
-//     for (let c = boxCol; c < boxCol + 3; c++) {
-//       if (!(r === row && c === col) && game.board[r][c] === value) {
-//         document.getElementById(`cell-${r}-${c}`).classList.add('conflict-cell');
-//       }
-//     }
-//   }
-// }
-
 // =======================
 // RENDER BOARD IN DOM
 // =======================
@@ -283,7 +221,14 @@ function newGame() {
   board = emptyBoard();
   generateSolution(board);
   solution = board.map(row => [...row]); // Save solution
-  board = makePuzzle(solution, 50);      // Remove ~50 cells
+
+  // 🎯 Set removeCount based on selected difficulty
+  let removeCount = 45; // default for medium
+  if (currentDifficulty === "easy") removeCount = 35;   // More givens
+  if (currentDifficulty === "medium") removeCount = 45; // Balanced
+  if (currentDifficulty === "hard") removeCount = 55;   // Fewer givens
+  
+  board = makePuzzle(solution, removeCount);      // Remove ~50 cells
   renderBoard();
   startTimer();
 }
@@ -291,64 +236,6 @@ function newGame() {
 // =======================
 // HANDLE CELL INPUT
 // =======================
-// function onCellInput(e) {
-//   const cell = e.target;
-//   if (!cell.classList.contains("cell") || cell.classList.contains("given")) return;
-
-//   const row = parseInt(cell.dataset.row);
-//   const col = parseInt(cell.dataset.col);
-//   const val = parseInt(cell.textContent);
-
-//   // First: clear all previous highlights
-//   document.querySelectorAll(".highlight, .conflict-number, .same-number").forEach(c => {
-//     c.classList.remove("highlight", "conflict-number", "same-number");
-//   });
-
-//   if (Number.isNaN(val) || val < 1 || val > 9) {
-//     cell.textContent = "";
-//     return;
-//   }
-
-//   if (val === solution[row][col]) {
-//     board[row][col] = val;
-//     cell.classList.remove("conflict");
-//     remaining = board.flat().filter(v => v === 0).length;
-//     document.getElementById("remaining").textContent = remaining;
-
-//     if (remaining === 0) {
-//       alert("🎉 Congratulations! You solved the puzzle!");
-//     }
-//   } else {
-//     cell.classList.add("conflict");
-
-//     // Highlight row, column, and 3x3 box
-//     document.querySelectorAll(".cell").forEach(cell => {
-//       const r = parseInt(cell.dataset.row);
-//       const cc = parseInt(cell.dataset.col);
-
-//       const inSameRow = r === row;
-//       const inSameCol = cc === col;
-//       const inSameBox = Math.floor(r / 3) === Math.floor(row / 3) && Math.floor(cc / 3) === Math.floor(col / 3);
-
-//       if (inSameRow || inSameCol || inSameBox) {
-//         cell.classList.add("highlight");
-//       }
-
-//       // Highlight same numbers with border
-//       if (parseInt(c.textContent) === val && c !== cell) {
-//         cell.classList.add("same-number");
-//       }
-//     });
-
-//     mistakes++;
-//     document.getElementById("mistakes").textContent = mistakes;
-
-//     if (mistakes >= 3) {
-//       alert("❌ Game Over! Too many mistakes.");
-//       newGame();
-//     }
-//   }
-// }
 
 function onCellInput(e) {
   const cell = e.target;
@@ -417,13 +304,6 @@ function onCellInput(e) {
 // EVENT LISTENERS
 // =======================
 document.getElementById("btn-new").addEventListener("click", newGame);
-// document.querySelectorAll('.cell').forEach(cell => {
-//   cell.addEventListener('click', e => {
-//     const row = parseInt(cell.dataset.row);
-//     const col = parseInt(cell.dataset.col);
-//     highlightRelatedCells(row, col);
-//   });
-// });
 
 let activeCell = null;
 
@@ -570,9 +450,68 @@ document.getElementById("btn-solve").addEventListener("click", () => {
   }, 5000);
 });
 
+document.getElementById("btn-hint").addEventListener("click", () => {
+  // Collect all cells that are EMPTY and NOT given
+  const emptyCells = Array.from(document.querySelectorAll(".cell")).filter(cell => {
+    return !cell.classList.contains("given") && cell.textContent.trim() === "";
+  });
+
+  if (emptyCells.length === 0) {
+    alert("No empty cells left to give a hint!");
+    return;
+  }
+
+  // Select a random empty cell
+  const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  const row = parseInt(randomCell.dataset.row, 10);
+  const col = parseInt(randomCell.dataset.col, 10);
+
+  // Fill with correct solution
+  board[row][col] = solution[row][col];
+  randomCell.textContent = solution[row][col];
+  randomCell.classList.add("user-solved"); // Apply user color style
+  randomCell.contentEditable = "false";
+  remaining = board.flat().filter(v => v === 0).length;
+  document.getElementById("remaining").textContent = remaining; // Prevent editing after hint
+
+  // Increment hint counter
+  hintCount++;
+});
+
+// 🎯 Difficulty button logic
+document.getElementById("easy").addEventListener("click", () => {
+  currentDifficulty = "easy";
+  highlightDifficultyButton("easy");
+  newGame();
+});
+
+document.getElementById("medium").addEventListener("click", () => {
+  currentDifficulty = "medium";
+  highlightDifficultyButton("medium");
+  newGame();
+});
+
+document.getElementById("hard").addEventListener("click", () => {
+  currentDifficulty = "hard";
+  highlightDifficultyButton("hard");
+  newGame();
+});
+
+// 🌟 Visual feedback on active difficulty button
+function highlightDifficultyButton(selected) {
+  ["easy", "medium", "hard"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (id === selected) {
+      btn.classList.add("active-difficulty");
+    } else {
+      btn.classList.remove("active-difficulty");
+    }
+  });
+}
 
 // =======================
 // INIT
 // =======================
 newGame();
+highlightDifficultyButton(currentDifficulty);
 

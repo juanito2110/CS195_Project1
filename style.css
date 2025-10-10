@@ -221,12 +221,35 @@
       font-weight:600;
       letter-spacing:0.2px;
     }
+
+    .btn:hover{background:rgba(255,255,255,0.02); box-shadow:0 8px 18px rgba(0,0,0,0.35); }
+
     .btn.primary{
       background:linear-gradient(90deg,var(--accent), #6b8bff);
       border:none;
       color:white;
       box-shadow:0 8px 18px rgba(124,92,255,0.14);
+      transition: transform 0.1s ease-in-out;
     }
+
+
+
+    
+
+    .btn.primary:hover{box-shadow:0 12px 24px rgba(124,92,255,0.24); transform: scale(1.03);}
+
+    .active-difficulty {
+      background: rgba(255, 255, 255, 0.228);
+      transform: scale(1.05);
+      font-weight: bold;
+    }
+
+    .active-difficulty:hover {
+      background-color: rgba(255, 255, 255, 0.322);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.176);
+      transform: scale(1.05); /* Maintain the scale */
+    }
+
     label{color:var(--muted); font-size:0.9rem}
 
     .stats{
@@ -259,6 +282,11 @@
       background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
       color:var(--given);
       cursor:pointer;
+    }
+
+    .numpad button:hover{
+      background:rgba(255,255,255,0.02);
+      box-shadow:0 8px 18px rgba(0,0,0,0.35);
     }
 
     footer.hint{
